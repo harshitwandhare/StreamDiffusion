@@ -206,3 +206,32 @@ __pycache__/
 
 models/RealESR*
 *.safetensors
+
+# Local model weights (large files — download separately)
+models/
+!models/.gitkeep
+
+# Runtime outputs
+td_out/
+reports/
+images/outputs/
+*.err
+
+# Debug / diagnostic scripts
+test_dll*.py
+fix_encoding*.py
+check_bytes*.py
+inspect_bytes.py
+
+# Windows launchers with local paths (personal setup)
+run_img2img.bat
+run_txt2img.bat
+run_tensorrt_compile.bat
+
+# Personal notes (not for public repo)
+INTERVIEW_PREP.md
+MASTER_INTERVIEW_PREP.md
+LEARN_FROM_SCRATCH.md
+SETUP_NOTES.md
+RESEARCH_NOTES.md
+HOW_TO_RUN.md

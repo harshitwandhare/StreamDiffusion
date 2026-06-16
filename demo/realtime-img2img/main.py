@@ -78,6 +78,8 @@ class App:
                         await self.conn_manager.disconnect(user_id)
                         return
                     data = await self.conn_manager.receive_json(user_id)
+                    if data is None:
+                        break
                     if data["status"] == "next_frame":
                         info = pipeline.Info()
                         params = await self.conn_manager.receive_json(user_id)
@@ -109,13 +111,19 @@ class App:
                 async def generate():
                     while True:
                         last_time = time.time()
+                        if not self.conn_manager.check_user(user_id):
+                            break
                         await self.conn_manager.send_json(
                             user_id, {"status": "send_frame"}
                         )
                         params = await self.conn_manager.get_latest_data(user_id)
                         if params is None:
+                            if not self.conn_manager.check_user(user_id):
+                                break
+                            await asyncio.sleep(0.01)
                             continue
-                        image = pipeline.predict(params)
+                        loop = asyncio.get_event_loop()
+                        image = await loop.run_in_executor(None, pipeline.predict, params)
                         if image is None:
                             continue
                         frame = pil_to_frame(image)

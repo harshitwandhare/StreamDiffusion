@@ -19,12 +19,18 @@
 #
 
 import gc
+import sys
 from collections import OrderedDict
 from typing import *
 
 import numpy as np
 import onnx
 import onnx_graphsurgeon as gs
+if sys.platform == "win32":
+    try:
+        import tensorrt_loader  # noqa: F401 — pre-loads DLLs on Windows
+    except ImportError:
+        pass
 import tensorrt as trt
 import torch
 from cuda import cudart

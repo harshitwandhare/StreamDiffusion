@@ -4,37 +4,44 @@
   import { onMount } from 'svelte';
 
   let deviceId: string = '';
-  $: {
-    console.log($mediaDevices);
-  }
-  $: {
-    console.log(deviceId);
-  }
+
   onMount(() => {
-    deviceId = $mediaDevices[0].deviceId;
+    // Pick first real camera (NDI devices already filtered out in enumerateDevices)
+    if ($mediaDevices.length > 0) {
+      deviceId = $mediaDevices[0].deviceId;
+    }
   });
+
+  // Keep deviceId in sync if mediaDevices list changes
+  $: if ($mediaDevices.length > 0 && !deviceId) {
+    deviceId = $mediaDevices[0].deviceId;
+  }
 </script>
 
-<div class="flex items-center justify-center text-xs">
+<div class="flex items-center justify-center gap-1 text-xs">
   <button
     title="Share your screen"
-    class="border-1 my-1 flex cursor-pointer gap-1 rounded-md border-gray-500 border-opacity-50 bg-slate-100 bg-opacity-30 p-1 font-medium text-white"
+    class="my-1 flex cursor-pointer gap-1 rounded-md border border-gray-400 bg-gray-800 bg-opacity-80 p-1 font-medium text-white hover:bg-gray-700"
     on:click={() => mediaStreamActions.startScreenCapture()}
   >
     <span>Share</span>
-
     <Screen classList={''} />
   </button>
-  {#if $mediaDevices}
+  {#if $mediaDevices && $mediaDevices.length > 0}
     <select
       bind:value={deviceId}
       on:change={() => mediaStreamActions.switchCamera(deviceId)}
       id="devices-list"
-      class="border-1 block cursor-pointer rounded-md border-gray-800 border-opacity-50 bg-slate-100 bg-opacity-30 p-1 font-medium text-white"
+      class="block cursor-pointer rounded-md border border-gray-400 bg-gray-800 bg-opacity-90 p-1 font-medium text-white"
+      style="max-width: 200px; color: white; background-color: rgba(30,30,30,0.92);"
     >
-      {#each $mediaDevices as device, i}
-        <option value={device.deviceId}>{device.label}</option>
+      {#each $mediaDevices as device}
+        <option value={device.deviceId} style="background:#1e1e1e; color:white;">
+          {device.label || 'Camera ' + device.deviceId.substring(0, 6)}
+        </option>
       {/each}
     </select>
+  {:else}
+    <span class="rounded-md bg-gray-800 bg-opacity-80 p-1 text-gray-300">No cameras found</span>
   {/if}
 </div>

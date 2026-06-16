@@ -11,12 +11,21 @@ export const mediaDevices = writable<MediaDeviceInfo[]>([]);
 export const mediaStreamStatus = writable(MediaStreamStatusEnum.INIT);
 export const mediaStream = writable<MediaStream | null>(null);
 
+// Labels containing these strings are NDI virtual cameras — skip them
+const NDI_LABELS = ['ndi', 'newtek', 'ndi webcam', 'ndi video', 'ndi hx'];
+
+function isNdiDevice(device: MediaDeviceInfo): boolean {
+    const label = device.label.toLowerCase();
+    return NDI_LABELS.some(kw => label.includes(kw));
+}
+
 export const mediaStreamActions = {
     async enumerateDevices() {
-        // console.log("Enumerating devices");
         await navigator.mediaDevices.enumerateDevices()
             .then(devices => {
-                const cameras = devices.filter(device => device.kind === 'videoinput');
+                const cameras = devices.filter(
+                    device => device.kind === 'videoinput' && !isNdiDevice(device)
+                );
                 mediaDevices.set(cameras);
             })
             .catch(err => {
@@ -24,10 +33,20 @@ export const mediaStreamActions = {
             });
     },
     async start(mediaDevicedID?: string) {
+        // If no device specified, use the first real (non-NDI) camera
+        if (!mediaDevicedID) {
+            const allDevices = await navigator.mediaDevices.enumerateDevices();
+            const realCam = allDevices.find(
+                d => d.kind === 'videoinput' && !isNdiDevice(d)
+            );
+            if (realCam) mediaDevicedID = realCam.deviceId;
+        }
         const constraints = {
             audio: false,
             video: {
-                width: 1024, height: 1024, deviceId: mediaDevicedID
+                width: { ideal: 1024 },
+                height: { ideal: 1024 },
+                deviceId: mediaDevicedID ? { exact: mediaDevicedID } : undefined
             }
         };
 
@@ -76,7 +95,7 @@ export const mediaStreamActions = {
         }
         const constraints = {
             audio: false,
-            video: { width: 1024, height: 1024, deviceId: mediaDevicedID }
+            video: { width: { ideal: 1024 }, height: { ideal: 1024 }, deviceId: { exact: mediaDevicedID } }
         };
         await navigator.mediaDevices
             .getUserMedia(constraints)

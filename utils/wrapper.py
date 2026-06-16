@@ -1,11 +1,21 @@
 import gc
 import os
+import socket as _socket
 from pathlib import Path
 import traceback
 from typing import List, Literal, Optional, Union, Dict
 
 import numpy as np
 import torch
+
+# Force IPv4 for all HuggingFace connections.
+# On networks where IPv6 routes to cdn-lfs.huggingface.co are blocked,
+# Python's requests and urllib3 default to IPv6 and fail at TLS handshake
+# (WinError 10054) even when the model is already in local cache.
+_orig_getaddrinfo = _socket.getaddrinfo
+def _ipv4_only(host, port, family=0, type=0, proto=0, flags=0):
+    return _orig_getaddrinfo(host, port, _socket.AF_INET, type, proto, flags)
+_socket.getaddrinfo = _ipv4_only
 from diffusers import AutoencoderTiny, StableDiffusionPipeline
 from PIL import Image
 
