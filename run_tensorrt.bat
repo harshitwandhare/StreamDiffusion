@@ -20,7 +20,7 @@ echo.
 set /p CHOICE="Enter 1 or 2: "
 
 if "%CHOICE%"=="1" (
-    python run_tensorrt_benchmark.py
+    python scripts/run_tensorrt_benchmark.py
 ) else (
     python examples\img2img\single.py ^
         --model_id_or_path "stabilityai/sd-turbo" ^

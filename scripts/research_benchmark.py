@@ -22,7 +22,7 @@ import datetime
 import torch
 import gc
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.wrapper import StreamDiffusionWrapper
 from PIL import Image
 

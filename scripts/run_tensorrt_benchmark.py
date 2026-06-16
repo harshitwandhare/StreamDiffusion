@@ -12,7 +12,8 @@ import numpy as np
 import PIL.Image
 import torch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _ROOT)
 import tensorrt_loader  # noqa: F401 — must be first, pre-loads DLLs
 
 from utils.wrapper import StreamDiffusionWrapper

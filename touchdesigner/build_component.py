@@ -207,7 +207,7 @@ def start():
 
     script = 'td_ndi_bridge.py' if transport == 'ndi' else 'td_bridge.py'
     python = os.path.join(base, '.venv', 'Scripts', 'python.exe')
-    script_path = os.path.join(base, script)
+    script_path = os.path.join(base, 'touchdesigner', script)
     config_path = os.path.join(base, 'configs', cfg + '.yaml')
 
     if not os.path.exists(python):

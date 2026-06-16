@@ -5,7 +5,7 @@ cd /d "%~dp0"
 echo ================================================================
 echo  StreamDiffusion NDI Bridge
 echo  Output appears as "StreamDiffusion" NDI source in TouchDesigner
-echo  Add: NDI In TOP -> select "StreamDiffusion"
+echo  Add: NDI In TOP -^> select "StreamDiffusion"
 echo ================================================================
 echo.
 echo Select mode:
@@ -27,16 +27,16 @@ call .venv\Scripts\activate.bat
 if "%CHOICE%"=="2" (
     echo Starting TensorRT + NDI...
     echo NOTE: First run compiles ~53s, looks frozen - just wait.
-    python td_ndi_bridge.py --config configs/sdturbo_tensorrt.yaml --webcam %CAM%
+    python touchdesigner/td_ndi_bridge.py --config configs/sdturbo_tensorrt.yaml --webcam %CAM%
 ) else if "%CHOICE%"=="3" (
     echo Starting Kohaku + NDI...
-    python td_ndi_bridge.py --config configs/kohaku_quality.yaml --webcam %CAM%
+    python touchdesigner/td_ndi_bridge.py --config configs/kohaku_quality.yaml --webcam %CAM%
 ) else if "%CHOICE%"=="4" (
     echo Starting art preset + NDI...
-    python td_ndi_bridge.py --config configs/consciousness_projection.yaml --webcam %CAM%
+    python touchdesigner/td_ndi_bridge.py --config configs/consciousness_projection.yaml --webcam %CAM%
 ) else (
     echo Starting xformers + NDI...
-    python td_ndi_bridge.py --config configs/sdturbo_fast.yaml --webcam %CAM%
+    python touchdesigner/td_ndi_bridge.py --config configs/sdturbo_fast.yaml --webcam %CAM%
 )
 
 echo.

@@ -12,7 +12,7 @@ import json
 import torch
 from PIL import Image
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.wrapper import StreamDiffusionWrapper
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
