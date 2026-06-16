@@ -110,7 +110,57 @@ The StreamDiffusionTD backend can be controlled by any OSC-compatible app, not j
 
 ---
 
-## Method B: td_bridge.py (no NDI required)
+## Method B: td_ndi_bridge.py (this repo — NDI, no .tox needed)
+
+Same as Method A's video quality (NDI stream, not PNG polling), but you don't need the dotsimulate .tox file. The Python script runs the StreamDiffusion backend and sends output directly as an NDI video source.
+
+### Setup
+
+```powershell
+# Install NDI Python bindings (one time)
+.venv\Scripts\activate
+pip install ndi-python
+
+# Then install NDI SDK for Windows from https://ndi.video/download-ndi-sdk/
+```
+
+### Running
+
+Double-click **`start_td_ndi.bat`** — it asks for mode and webcam index, then starts.
+
+Or directly:
+```powershell
+python td_ndi_bridge.py --config configs/sdturbo_fast.yaml --webcam 0
+```
+
+### TouchDesigner network
+
+```
+[NDI In TOP]
+  Source Name → StreamDiffusion      ← appears automatically once bridge starts
+  Band Width  → Highest              ← for low latency
+        │
+        ▼
+  [your TD network]
+```
+
+**OSC Out CHOP** (send control to Python)
+```
+Network Address → 127.0.0.1
+Network Port    → 9000
+```
+
+**OSC In CHOP** (receive stats from Python)
+```
+Network Address → 127.0.0.1
+Network Port    → 9001
+```
+
+The bridge also writes `td_out/current_frame.png` every frame as a fallback for File In TOP if NDI isn't configured yet.
+
+---
+
+## Method C: td_bridge.py (no NDI required)
 
 A Python script in this repo that reads the webcam, runs StreamDiffusion, and writes each output frame to `td_out/current_frame.png`. TouchDesigner polls the PNG file.
 

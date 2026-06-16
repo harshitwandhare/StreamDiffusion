@@ -227,6 +227,7 @@ inspect_bytes.py
 run_img2img.bat
 run_txt2img.bat
 run_tensorrt_compile.bat
+TOUCHDESIGNER_GUIDE.md
 
 # Personal notes (not for public repo)
 INTERVIEW_PREP.md
