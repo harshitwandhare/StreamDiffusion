@@ -1,0 +1,38 @@
+﻿# SD-Turbo: 1-step generation, highest FPS
+# Best for: live performance, real-time webcam transformation
+# RTX 2060 actual: 4.74 fps xformers (benchmarked) | 5.83 fps tensorrt (benchmarked 2026-06-17)
+
+model:
+  id: "D:\\Github\\StreamDiffusion\\models\\sd-turbo"   # local path; HF cache alternative: "stabilityai/sd-turbo"
+  use_tiny_vae: true
+  use_lcm_lora: false
+
+inference:
+  mode: "img2img"
+  width: 512
+  height: 512
+  t_index_list: [35, 45]       # 2-step denoising queue
+  cfg_type: "none"             # sd-turbo doesn't use CFG
+  guidance_scale: 1.0
+  delta: 0.5                   # img2img strength (0=preserve, 1=ignore input)
+  num_inference_steps: 50
+  acceleration: "xformers"
+  warmup: 10
+  seed: 42
+  enable_similar_image_filter: true
+  similar_image_filter_threshold: 0.98
+
+prompts:
+  default: "vivid digital painting, dynamic lighting, cinematic, high detail"
+  negative: "blurry, low quality, watermark"
+
+osc:
+  in_port: 9000               # OSC messages coming IN from TouchDesigner
+  out_port: 9001              # OSC messages going OUT to TouchDesigner
+  host: "127.0.0.1"
+
+output:
+  show_window: true
+  save_frames: true
+  frame_dir: "td_out"         # TouchDesigner watches this folder
+

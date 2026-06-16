@@ -1,0 +1,54 @@
+ï»¿# Consciousness Projection Preset
+# For live installation work: real-time transformation of the visible world
+# through the lens of inner perception Ã¢â¬” what we carry, what we see with
+# the eye that isn't an eye, what consciousness does when it turns toward itself.
+#
+# Core concept: the camera sees the outer. The model reveals the inner.
+# Every frame is both memory and anticipation Ã¢â¬” seeing backward and forward at once.
+# RTX 2060 actual: ~4-5 fps xformers | 5.83 fps tensorrt (benchmarked)
+
+model:
+  id: "D:\\Github\\StreamDiffusion\\models\\sd-turbo"   # local path; HF cache alternative: "stabilityai/sd-turbo"
+  use_tiny_vae: true
+  use_lcm_lora: false
+
+inference:
+  mode: "img2img"
+  width: 512
+  height: 512
+  t_index_list: [32, 45]
+  cfg_type: "none"
+  guidance_scale: 1.0
+  delta: 0.6                   # higher delta = more transformation from input; the past made visible
+  num_inference_steps: 50
+  acceleration: "xformers"
+  warmup: 10
+  seed: 7
+  enable_similar_image_filter: true
+  similar_image_filter_threshold: 0.97
+
+# Prompt library Ã¢â¬” human perception, inner light, the third eye, temporal consciousness
+# Each describes a different mode of seeing: not what's there, but what's behind it.
+# Switch between these via OSC /prompt_index <int>
+prompts:
+  library:
+    - "third eye opening, fractal iris geometry, sacred light patterns, violet and indigo glow"
+    - "human consciousness as flowing light rivers, synapse lightning, warm amber, inner cosmos"
+    - "ancestral memory etched in neural pathways, roots of light growing upward, temporal vision"
+    - "collective human dream, all timelines simultaneously, soft luminous threads, interconnected"
+    - "pineal awakening, crown light blooming, geometric mandala, deep violet and gold"
+    - "recursive self-awareness, an eye within an eye within an eye, digital consciousness"
+    - "the moment before remembering, warm diffuse light, forms emerging from silence"
+  default: "third eye opening, fractal iris geometry, sacred light patterns, violet and indigo glow"
+  negative: "blurry, low quality, watermark, harsh shadows, flat"
+
+osc:
+  in_port: 9000
+  out_port: 9001
+  host: "127.0.0.1"
+
+output:
+  show_window: true
+  save_frames: true
+  frame_dir: "td_out"
+

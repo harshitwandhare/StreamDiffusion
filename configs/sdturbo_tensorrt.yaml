@@ -1,0 +1,39 @@
+# SD-Turbo + TensorRT: maximum FPS
+# Best for: live performance requiring highest possible frame rate
+# RTX 2060 actual: 5.83 fps (benchmarked 2026-06-17, +23% over xformers)
+# FIRST RUN: engine compile takes 5-10 min, looks frozen — just wait
+# Cached at: ~/.cache/streamdiffusion/engines/ (fast load on subsequent runs)
+
+model:
+  id: "D:\\Github\\StreamDiffusion\\models\\sd-turbo"
+  use_tiny_vae: true
+  use_lcm_lora: false
+
+inference:
+  mode: "img2img"
+  width: 512
+  height: 512
+  t_index_list: [35, 45]       # 2-step denoising queue
+  cfg_type: "none"             # sd-turbo doesn't use CFG
+  guidance_scale: 1.0
+  delta: 0.5
+  num_inference_steps: 50
+  acceleration: "tensorrt"
+  warmup: 10
+  seed: 42
+  enable_similar_image_filter: true
+  similar_image_filter_threshold: 0.98
+
+prompts:
+  default: "vivid digital painting, dynamic lighting, cinematic, high detail"
+  negative: "blurry, low quality, watermark"
+
+osc:
+  in_port: 9000
+  out_port: 9001
+  host: "127.0.0.1"
+
+output:
+  show_window: true
+  save_frames: true
+  frame_dir: "td_out"
