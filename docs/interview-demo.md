@@ -1,11 +1,6 @@
 # Interview Demo Guide — StreamDiffusion
 
-Complete step-by-step for the ATC Research Assistant interview.
-The task is: **StreamDiffusion Install and Setup (Tier II target)**.
-
----
-
-## Pre-flight checklist (run 5 min before interview)
+## Pre-flight checklist
 
 ```powershell
 cd D:\Github\StreamDiffusion
@@ -121,12 +116,12 @@ Result: ~5.8 fps, 172 ms/frame.
 ### 4. Single image generation (show the pipeline concept)
 
 ```powershell
-python examples/img2img/single.py \
-  --model_id_or_path "D:\Github\StreamDiffusion\models\sd-turbo" \
-  --prompt "vivid oil painting, golden hour, cinematic" \
-  --acceleration xformers \
-  --cfg_type none \
-  --guidance_scale 1.0 \
+python examples/img2img/single.py `
+  --model_id_or_path "D:\Github\StreamDiffusion\models\sd-turbo" `
+  --prompt "vivid oil painting, golden hour, cinematic" `
+  --acceleration xformers `
+  --cfg_type none `
+  --guidance_scale 1.0 `
   --seed 42
 ```
 
