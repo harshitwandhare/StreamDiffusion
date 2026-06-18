@@ -33,7 +33,7 @@ python scripts/test_cuda.py
 | Build your own .tox operator | `touchdesigner/build_component.py` | -- |
 | Benchmark xformers | `scripts/research_benchmark.py` | measures |
 | Benchmark TensorRT | `scripts/run_tensorrt_benchmark.py` | measures |
-| Multi-config comparison | `scripts/demo_tier2.py` | measures |
+| Multi-config comparison | `scripts/research_benchmark.py` | measures |
 
 ---
 
@@ -281,8 +281,8 @@ python scripts/research_benchmark.py --quick
 # TensorRT -- compiles engines (~53s first run), then benchmarks
 python scripts/run_tensorrt_benchmark.py
 
-# Multi-config comparison (2/3/4-step)
-python scripts/demo_tier2.py
+# Full benchmark (all models, 2/3/4-step configs)
+python scripts/research_benchmark.py
 ```
 
 Results saved to `reports/benchmark_<timestamp>.md`.
