@@ -32,6 +32,7 @@ Expected: `GPU: NVIDIA GeForce RTX 2060`, `xformers: 0.0.22.post7`, `All good.`
 | Text → image (single) | `examples/txt2img/single.py` | one-shot | WORKS (Kohaku only, not SD-Turbo) |
 | TouchDesigner PNG bridge | `touchdesigner/td_bridge.py` | 4.8 | WORKS |
 | TouchDesigner NDI bridge | `touchdesigner/td_ndi_bridge.py` | 4.8 | WORKS (needs NDI SDK) |
+| Build full TD interface | `touchdesigner/td_network_builder.py` | — | Run inside TD (auto-builds all nodes) |
 | Build .tox component | `touchdesigner/build_component.py` | — | Run inside TD |
 | Benchmark xformers | `scripts/research_benchmark.py` | measures | WORKS |
 | Benchmark TensorRT | `scripts/run_tensorrt_benchmark.py` | measures | WORKS |
@@ -160,7 +161,7 @@ python examples/vid2vid/main.py `
 
 Full guide: [`docs/touchdesigner-setup.md`](touchdesigner-setup.md)
 
-### 3a. PNG bridge (no extra installs — use this for demo)
+### 3a. PNG bridge — with full UI (no extra installs — use this for demo)
 
 **Step 1 — Start Python backend:**
 ```powershell
@@ -182,41 +183,34 @@ python touchdesigner/td_bridge.py --config configs/consciousness_projection.yaml
 python touchdesigner/td_bridge.py --config configs/sdturbo_tensorrt.yaml --webcam 0
 ```
 
-**Step 2 — TouchDesigner network setup:**
+**Step 2 — TouchDesigner network setup (auto-build, 30 seconds):**
 
 1. Open TouchDesigner 2023 → new empty project
-2. Press `Tab` → search `File In` → place **File In TOP**
-   - **File**: `D:/Github/StreamDiffusion/td_out/current_frame.png` (forward slashes)
-   - **Cook**: `Every Frame`
-   - **Always Active**: On
-   - Live frames appear in the node viewer
-3. Press `Tab` → search `OSC Out` → place **OSC Out CHOP**
-   - **Network Address**: `127.0.0.1`
-   - **Network Port**: `9000`
-4. Press `Tab` → search `OSC In` → place **OSC In CHOP**
-   - **Network Address**: `0.0.0.0`
-   - **Network Port**: `9001`
-   - You'll see `/fps`, `/vram_used`, `/status` channels appear
+2. Press `Tab` → **Text DAT** → place it
+3. Double-click → paste entire `touchdesigner/td_network_builder.py`
+4. Right-click → **Run Script**
+5. `/StreamDiffusion` container created with all nodes: input/output view, OSC, prompt box, model switches, stats
 
-**Step 3 — Send OSC control from TouchDesigner:**
+This builds: `input_view` (raw webcam), `output_view` (diffused), `osc_in`, `osc_out`, `prompt_text`, `strength_text`, `seed_text`, `executor` (auto-sends OSC), model-switch DATs, art preset DATs, and `stats_text`.
 
-Add a **Text DAT** → paste this → right-click → **Run Script**:
+For manual build see: `docs/touchdesigner-setup.md`
+
+**Step 3 — Control from TouchDesigner (after auto-build):**
+
+- Edit `prompt_text` DAT → executor auto-sends `/prompt` via OSC on every keystroke
+- Edit `strength_text` DAT (0.0–1.0) → auto-sends `/strength`
+- Right-click `switch_sdturbo` / `switch_kohaku` / `switch_art` / `switch_tensorrt` → Run Script to hot-swap model (~20s reload)
+- Right-click `preset_0`–`preset_6` → Run Script to cycle art presets
+
+Manual OSC (in any Text DAT → right-click → Run Script):
 ```python
-# Change prompt
-op('oscout1').sendOSC('/prompt', ['abstract generative art, flowing light, ethereal'])
-
-# Adjust transformation strength (0.0 = no change, 1.0 = full transform)
-op('oscout1').sendOSC('/strength', [0.75])
-
-# Change seed
-op('oscout1').sendOSC('/seed', [99])
-
-# Pause / resume
-op('oscout1').sendOSC('/pause', [1])   # pause
-op('oscout1').sendOSC('/pause', [0])   # resume
-
-# Cycle through consciousness_projection presets (0–6)
-op('oscout1').sendOSC('/prompt_index', [2])
+op('osc_out').sendOSC('/prompt', ['abstract generative art, flowing light, ethereal'])
+op('osc_out').sendOSC('/strength', [0.75])
+op('osc_out').sendOSC('/seed', [99])
+op('osc_out').sendOSC('/pause', [1])        # pause
+op('osc_out').sendOSC('/pause', [0])        # resume
+op('osc_out').sendOSC('/prompt_index', [2]) # art preset 2
+op('osc_out').sendOSC('/model', ['configs/kohaku_quality.yaml'])  # hot-swap
 ```
 
 ---
