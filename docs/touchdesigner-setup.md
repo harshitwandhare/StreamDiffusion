@@ -11,7 +11,7 @@ prompt text box, strength slider, model switching, and art presets — all contr
 Webcam
   |
   v
-Python: td_bridge.py  (GPU inference, ~4.8 fps)
+Python: td_bridge.py  (GPU inference, ~4.1 fps)
   |-- writes --> td_out/input_frame.png   (raw webcam, for TD left panel)
   |-- writes --> td_out/output_frame.png  (diffused output, for TD right panel)
   |
@@ -115,7 +115,7 @@ Right-click any model-switch DAT → **Run Script**:
 
 | DAT name | Model | FPS | VRAM | Notes |
 |---|---|---|---|---|
-| `switch_sdturbo` | SD-Turbo (local) | 4.8 | 2.5 GB | Default, fastest |
+| `switch_sdturbo` | SD-Turbo (local) | 4.14 | 2.5 GB | Default, fastest |
 | `switch_kohaku` | Kohaku v2.1 + LCM-LoRA | 3.4 | 2.7 GB | Better artistic quality |
 | `switch_art` | SD-Turbo (consciousness) | 4.5 | 2.5 GB | 7 built-in art prompts |
 | `switch_tensorrt` | SD-Turbo + TensorRT | 5.8 | 4.5 GB | Fastest, ~53s compile |

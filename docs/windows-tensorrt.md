@@ -95,8 +95,8 @@ python -c "import tensorrt_loader; import tensorrt as trt; print('TRT', trt.__ve
 
 | Acceleration | FPS | Latency | First-run compile |
 |---|---|---|---|
-| xformers | 4.74 | 211 ms | None |
-| TensorRT | 5.83 | 172 ms | ~53 seconds |
+| xformers | 4.1–4.8 | 241 ms | None |
+| TensorRT | 5.59 | 172 ms | ~53 seconds |
 
 TRT engine files are cached in `engines/` after the first run. Subsequent runs load in ~3 seconds.
 

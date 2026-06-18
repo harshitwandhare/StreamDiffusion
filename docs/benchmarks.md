@@ -15,15 +15,19 @@
 
 All tests: 512×512, `use_tiny_vae=True`, `use_denoising_batch=True`, `warmup=10`, n=50 frames.
 
+> **FPS variance note:** Measured range across multiple runs: **4.1–4.8 fps** (xformers, 2-step).
+> The lower end (4.1) occurs when the GPU is thermally saturated or background processes are active.
+> The upper end (~4.8) is the cold-start / idle-system result. Both are valid; quote the range.
+
 ---
 
 ## SD-Turbo — img2img
 
 | Acceleration | Steps | t_index_list | FPS | Latency | VRAM |
 |---|---|---|---|---|---|
-| xformers | 2 | [35, 45] | **4.74** | 211 ms | 2,495 MB |
-| xformers | 3 | [22, 32, 45] | **3.61** | 277 ms | 2,496 MB |
-| TensorRT | 2 | [35, 45] | **5.83** | 172 ms | ~4,500 MB |
+| xformers | 2 | [35, 45] | **4.1–4.8** | 210–241 ms | 2,495 MB |
+| xformers | 3 | [22, 32, 45] | **3.1–3.6** | 277–319 ms | 2,496 MB |
+| TensorRT | 2 | [35, 45] | **5.59** | 172 ms | ~4,500 MB |
 
 TRT improvement over xformers: **+23%** on RTX 2060 (Turing). Larger gains expected on Ampere/Ada (RTX 3000/4000).
 
@@ -45,7 +49,7 @@ TRT improvement over xformers: **+23%** on RTX 2060 (Turing). Larger gains expec
 |-----|-------------------|----------|-------|
 | RTX 4090 | 100+ fps | — | — |
 | RTX 3090 | 60+ fps | — | — |
-| RTX 2060 | — | **4.74–5.83 fps** | baseline |
+| RTX 2060 | — | **4.1–5.59 fps** (xformers 4.1–4.8, TRT 5.59) | baseline |
 
 Paper benchmarks are on RTX 3090/4090 with Linux. RTX 2060 has:
 - ~3-5x fewer tensor cores
@@ -66,12 +70,12 @@ Compilation is one-time per GPU per config. Subsequent runs load cached engines 
 
 ## Resolution Scaling
 
-At 512×512: 4.74 fps xformers baseline.
+At 512×512: 4.1–4.8 fps xformers baseline (thermal/load dependent).
 
 | Resolution | Expected FPS | Notes |
 |---|---|---|
-| 384×384 | ~6.5 fps | ~30% faster (fewer tokens in attention) |
-| 512×512 | 4.74 fps | Recommended sweet spot |
+| 384×384 | ~6.0–6.5 fps | ~30% faster (fewer tokens in attention) |
+| 512×512 | 4.1–4.8 fps | Recommended sweet spot |
 | 768×768 | ~2.0 fps | Quadratic attention scaling; approaches 6 GB VRAM limit |
 
 768×768 is feasible for static generation but too slow for real-time on 6 GB.

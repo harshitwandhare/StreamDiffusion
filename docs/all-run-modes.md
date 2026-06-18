@@ -23,15 +23,15 @@ Expected: `GPU: NVIDIA GeForce RTX 2060`, `xformers: 0.0.22.post7`, `All good.`
 
 | Goal | Script | FPS (RTX 2060) | Status |
 |---|---|---|---|
-| Webcam to browser (fastest) | `demo/realtime-img2img/main.py` | 4.8 | WORKS |
+| Webcam to browser (fastest) | `demo/realtime-img2img/main.py` | 4.14 | WORKS |
 | Text prompt to browser | `demo/realtime-txt2img/main.py` | — | BROKEN (upstream TS build error) |
 | Video file to video file | `examples/vid2vid/main.py` | — | WORKS |
-| Screen capture to window | `examples/screen/main.py` | 4.8 | WORKS |
+| Screen capture to window | `examples/screen/main.py` | 4.14 | WORKS |
 | Image → image (single) | `examples/img2img/single.py` | one-shot | WORKS |
 | Image → image (batch) | `examples/img2img/multi.py` | batch | WORKS |
 | Text → image (single) | `examples/txt2img/single.py` | one-shot | WORKS (Kohaku only, not SD-Turbo) |
-| TouchDesigner PNG bridge | `touchdesigner/td_bridge.py` | 4.8 | WORKS |
-| TouchDesigner NDI bridge | `touchdesigner/td_ndi_bridge.py` | 4.8 | WORKS (needs NDI SDK) |
+| TouchDesigner PNG bridge | `touchdesigner/td_bridge.py` | 4.14 | WORKS |
+| TouchDesigner NDI bridge | `touchdesigner/td_ndi_bridge.py` | 4.14 | WORKS (needs NDI SDK) |
 | Build full TD interface | `touchdesigner/td_network_builder.py` | — | Run inside TD (auto-builds all nodes) |
 | Build .tox component | `touchdesigner/build_component.py` | — | Run inside TD |
 | Benchmark xformers | `scripts/research_benchmark.py` | measures | WORKS |
@@ -249,10 +249,10 @@ In TouchDesigner:
 
 | Config | Model | Steps | FPS (RTX 2060) | VRAM | Notes |
 |---|---|---|---|---|---|
-| `configs/sdturbo_fast.yaml` | SD-Turbo (local) | 2 | **4.74** | 2.5 GB | Default — always works |
-| `configs/sdturbo_tensorrt.yaml` | SD-Turbo + TRT | 2 | **5.83** | 4.5 GB | ~53s compile on first run, cached after |
+| `configs/sdturbo_fast.yaml` | SD-Turbo (local) | 2 | **4.14** | 2.5 GB | Default — always works |
+| `configs/sdturbo_tensorrt.yaml` | SD-Turbo + TRT | 2 | **5.59** | 4.5 GB | ~53s compile on first run, cached after |
 | `configs/kohaku_quality.yaml` | Kohaku v2.1 + LCM-LoRA | 3 | **~3.4** | 2.7 GB | Better artistic quality |
-| `configs/consciousness_projection.yaml` | SD-Turbo (local) | 2 | **~4.5** | 2.5 GB | Art/installation, 7 built-in prompts |
+| `configs/consciousness_projection.yaml` | SD-Turbo (local) | 2 | **~4.1** | 2.5 GB | Art/installation, 7 built-in prompts |
 
 ---
 
@@ -275,9 +275,9 @@ Reports saved to `reports/benchmark_<timestamp>.md`.
 
 | Acceleration | Steps | FPS | Latency | VRAM |
 |---|---|---|---|---|
-| xformers | 2 | **4.74** | 211 ms | 2,495 MB |
-| xformers | 3 | **3.61** | 277 ms | 2,496 MB |
-| TensorRT | 2 | **5.83** | 172 ms | ~4,500 MB |
+| xformers | 2 | **4.14** | 241 ms | 2,495 MB |
+| xformers | 3 | **3.15** | 318 ms | 2,495 MB |
+| TensorRT | 2 | **5.59** | 172 ms | ~4,500 MB |
 
 See [`docs/benchmarks.md`](benchmarks.md) for full comparison including Kohaku and resolution scaling.
 
