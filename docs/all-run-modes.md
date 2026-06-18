@@ -234,7 +234,7 @@ guidance scale, live FPS/VRAM readout.
 4. Setup page -> **Base Folder**: `D:\Github\StreamDiffusion` -> **Start Stream**
 5. Right-click -> **Save Component As** -> `StreamDiffusionTD.tox`
 
-Full guide: [`touchdesigner/HOW_TO_BUILD_TOX.md`](../touchdesigner/HOW_TO_BUILD_TOX.md)
+Run `touchdesigner/build_component.py` inside TouchDesigner as a Script DAT to auto-build the component.
 
 ---
 
@@ -257,7 +257,7 @@ In TouchDesigner:
 - **OSC Out CHOP** -> `127.0.0.1:9000`
 - **OSC In CHOP** -> `127.0.0.1:9001`
 
-Full guide: [`docs/touchdesigner-integration.md`](touchdesigner-integration.md)
+See section 3a above for OSC control details.
 
 ---
 
@@ -294,7 +294,7 @@ Results saved to `reports/benchmark_<timestamp>.md`.
 | xformers | 4.74 | 211 ms | 2,495 MB |
 | TensorRT | 5.83 | 172 ms | ~4,500 MB |
 
-See [`docs/benchmarks.md`](benchmarks.md) for full details.
+See section 4 (Configs reference) above for per-config details.
 
 ---
 
