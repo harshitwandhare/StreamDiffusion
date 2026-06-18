@@ -70,86 +70,69 @@ Wait for:
 
 A preview window shows webcam input (left) and diffused output (right) with FPS overlay. Leave this terminal running.
 
-#### Step 2 — Build the TouchDesigner network (auto, ~30 seconds)
+#### Step 2 — Build the TD network (4 nodes, ~2 minutes)
 
-1. Open **TouchDesigner 2023** → File → New Project
-2. Press `Tab` → type `Text DAT` → place it in the network
-3. Double-click the Text DAT → select all → delete
-4. Open `touchdesigner/td_network_builder.py` in any text editor → copy all
-5. Paste into the Text DAT → right-click → **Run Script**
-6. `/StreamDiffusion` container appears with all nodes built
+Create these 4 nodes manually in TD. Full guide: [`docs/touchdesigner-setup.md`](touchdesigner-setup.md)
 
-#### Step 3 — View input and output in TD
+**Node 1 — Output image:** `Tab` → TOP tab → **File In**
+- File: `D:/Github/StreamDiffusion/td_out/output_frame.png` (forward slashes)
+- Cook Rate: `Every Frame`, Always Active: `On`
+- Right-click → **View** → live diffused output appears
 
-Inside the `/StreamDiffusion` container:
-- Double-click `input_view` TOP → right-click → **View** → raw webcam frames (live)
-- Double-click `output_view` TOP → right-click → **View** → diffused output (live)
+**Node 2 — OSC Out:** `Tab` → CHOP tab → **OSC Out**
+- Network Address: `127.0.0.1`, Port: `9000`
+- TD names this `oscout1` by default
 
-If either shows a static or black frame:
-- Click the TOP → Parameters panel → set **Cook Rate** = `Every Frame`, **Always Active** = `On`
+**Node 3 — OSC In:** `Tab` → CHOP tab → **OSC In**
+- Port: `9001`, Active: `On`
+- `/fps`, `/vram_used`, `/status` channels appear from Python
 
-#### Step 4 — Change prompt live from TD
-
-Double-click `prompt_text` DAT → edit the text. The `executor` DAT automatically sends `/prompt` via OSC to Python on every change — no button press needed.
-
-Or manually in any Text DAT (right-click → Run Script):
+**Node 4 — Control DAT:** `Tab` → DAT tab → **Text** → paste:
 ```python
-op('osc_out').sendOSC('/prompt', ['abstract generative art, flowing light, ethereal'])
+osc = op('oscout1')
+osc.sendOSC('/prompt',   ["vivid oil painting, golden hour, cinematic"])
+osc.sendOSC('/strength', [0.6])
+osc.sendOSC('/seed',     [42])
 ```
+Edit prompt/strength → right-click → **Run Script** → Python updates live.
 
-#### Step 5 — Adjust transformation strength
+#### Step 3 — Change prompt and strength
 
-Double-click `strength_text` DAT → change the number:
-- `0.3` = subtle stylization (input clearly visible)
-- `0.5` = balanced (default)
-- `0.8` = heavy transform (input barely visible, very dreamlike)
+Edit the values in the control DAT → right-click → **Run Script**:
+- `strength = 0.3` → subtle (input clearly visible)
+- `strength = 0.6` → balanced (default)
+- `strength = 0.85` → heavy transform (very dreamlike)
 
-Executor auto-sends `/strength` to Python.
+#### Step 4 — Switch models from TD (hot-swap, ~20s reload)
 
-Or: `op('osc_out').sendOSC('/strength', [0.75])`
+Create one Text DAT per model → right-click → **Run Script**:
 
-#### Step 6 — Switch models from TD (hot-swap)
-
-Right-click any model DAT → **Run Script**:
-
-| DAT name | Model | FPS | VRAM |
+| Script | Model | FPS | VRAM |
 |---|---|---|---|
-| `switch_sdturbo` | SD-Turbo (local) | 4.14 | 2.5 GB |
-| `switch_kohaku` | Kohaku v2.1 + LCM-LoRA | ~3.4 | 2.7 GB |
-| `switch_art` | SD-Turbo (consciousness) | ~4.5 | 2.5 GB |
-| `switch_tensorrt` | SD-Turbo + TensorRT | 5.59 | 4.5 GB |
+| `op('oscout1').sendOSC('/model', ['configs/sdturbo_fast.yaml'])` | SD-Turbo | 4.14 | 2.5 GB |
+| `op('oscout1').sendOSC('/model', ['configs/kohaku_quality.yaml'])` | Kohaku | ~3.4 | 2.7 GB |
+| `op('oscout1').sendOSC('/model', ['configs/consciousness_projection.yaml'])` | Art | ~4.1 | 2.5 GB |
+| `op('oscout1').sendOSC('/model', ['configs/sdturbo_tensorrt.yaml'])` | TensorRT | 5.59 | 4.5 GB |
 
-After clicking: terminal shows `[OSC] model switch requested` → model reloads (~20s) → output resumes with new model. `stats_text` DAT updates with new model name.
+Terminal shows `[OSC] model switch requested` → output freezes → resumes with new model.
 
-#### Step 7 — Art installation presets
+#### Step 5 — Art installation presets
 
-Switch to art mode first:
+After switching to the art config, cycle 7 built-in prompts:
 ```python
-# switch_art DAT → Run Script (or OSC directly):
-op('osc_out').sendOSC('/model', ['configs/consciousness_projection.yaml'])
+op('oscout1').sendOSC('/prompt_index', [0])  # vivid digital painting
+op('oscout1').sendOSC('/prompt_index', [3])  # bioluminescent deep sea
+op('oscout1').sendOSC('/prompt_index', [5])  # neural lattice visualization
 ```
 
-Then right-click `preset_0` through `preset_6` → **Run Script** to cycle 7 built-in prompts:
+#### Step 6 — View live stats from OSC In CHOP
 
-| Preset | Style |
-|---|---|
-| 0 | vivid digital painting |
-| 1 | cosmic consciousness |
-| 2 | fractal dreamscape |
-| 3 | bioluminescent deep sea |
-| 4 | sacred geometry projection |
-| 5 | neural lattice visualization |
-| 6 | quantum field interference |
-
-#### Step 8 — View live stats in TD
-
-`stats_text` DAT auto-updates every frame:
+After running, the OSC In CHOP (port 9001) shows live channels from Python:
 ```
-FPS     4.1
-VRAM    2495 MB
-Status  running
-Model   sdturbo_fast
-Prompt  vivid digital painting...
+/fps          4.1
+/vram_used    2495
+/status       running
+/model_name   sdturbo_fast
 ```
 
 ---
@@ -211,7 +194,7 @@ python examples/txt2img/single.py `
 
 ### Q3 — Systems integration / TouchDesigner (connects to: "integrate AI workflows with TouchDesigner, OSC, creative platforms")
 
-> "I connected StreamDiffusion to TouchDesigner using a PNG bridge: Python writes each processed frame to `td_out/output_frame.png`, TouchDesigner polls it with a File In TOP set to cook every frame — zero extra installs, works on any TD version. I also save the raw input frame to `input_frame.png` so TD shows input and output side-by-side. Bidirectional OSC control: TD sends `/prompt`, `/strength`, `/seed`, `/model`, `/pause` to port 9000; Python sends `/fps`, `/vram_used`, `/status`, `/model_name` back on port 9001. I added hot-swap model switching via OSC — TD sends `/model configs/kohaku_quality.yaml`, Python tears down the current StreamDiffusion pipeline, releases GPU memory, and reinitializes with the new model, all without restarting the script. I also wrote a network-builder Python script that runs inside TouchDesigner and programmatically creates the entire interface — all nodes, their parameters, and the execute DAT that auto-sends OSC on every text edit. For a live installation I'd add: a watchdog subprocess that auto-restarts Python on crash, error logging with last-prompt and VRAM state, and a thermal soak test before public opening."
+> "I connected StreamDiffusion to TouchDesigner using a PNG bridge: Python writes each processed frame to `td_out/output_frame.png`, TouchDesigner polls it with a File In TOP set to cook every frame — zero extra installs, works on any TD version. I also save the raw input frame to `input_frame.png` so TD can show input and output side-by-side. The setup in TD is 4 nodes: File In TOP for the output image, OSC Out CHOP sending to port 9000, OSC In CHOP receiving on port 9001, and a Text DAT with a control script the artist edits and runs to change prompt, strength, or seed. Bidirectional OSC: TD sends `/prompt`, `/strength`, `/seed`, `/model`, `/pause`; Python sends `/fps`, `/vram_used`, `/status`, `/model_name` back. I added hot-swap model switching — TD sends `/model configs/kohaku_quality.yaml`, Python releases GPU memory and reinitializes with the new model without restarting the script, ~20 second reload. For a live installation I'd add: a watchdog subprocess that auto-restarts Python on crash, error logging with last-prompt and VRAM state, and a thermal soak test before public opening."
 
 ### Q4 — Documentation (connects to: "document technical processes clearly for interdisciplinary collaborators")
 
@@ -283,15 +266,16 @@ python examples/screen/main.py `
   --cfg_type self
 ```
 
-### OSC control from TD (in any Text DAT → Run Script)
+### OSC control from TD (in any Text DAT → right-click → Run Script)
 
 ```python
-op('osc_out').sendOSC('/prompt',   ['abstract generative art, flowing light'])
-op('osc_out').sendOSC('/strength', [0.75])
-op('osc_out').sendOSC('/seed',     [42])
-op('osc_out').sendOSC('/pause',    [1])    # 1=pause, 0=resume
-op('osc_out').sendOSC('/model',    ['configs/kohaku_quality.yaml'])
-op('osc_out').sendOSC('/prompt_index', [3])  # art preset 3
+# oscout1 is the default name TD gives to the first OSC Out CHOP you place
+op('oscout1').sendOSC('/prompt',       ['abstract generative art, flowing light'])
+op('oscout1').sendOSC('/strength',     [0.75])
+op('oscout1').sendOSC('/seed',         [42])
+op('oscout1').sendOSC('/pause',        [1])    # 1=pause, 0=resume
+op('oscout1').sendOSC('/model',        ['configs/kohaku_quality.yaml'])
+op('oscout1').sendOSC('/prompt_index', [3])    # art preset 3
 ```
 
 ---

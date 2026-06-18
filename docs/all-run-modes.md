@@ -161,56 +161,59 @@ python examples/vid2vid/main.py `
 
 Full guide: [`docs/touchdesigner-setup.md`](touchdesigner-setup.md)
 
-### 3a. PNG bridge — with full UI (no extra installs — use this for demo)
+### 3a. PNG bridge (no extra installs — use this for demo)
 
 **Step 1 — Start Python backend:**
 ```powershell
 python touchdesigner/td_bridge.py --config configs/sdturbo_fast.yaml --webcam 0
 ```
 
-Wait for:
-```
-[INIT] Model ready.
-[RUN] Streaming. Ctrl+C to stop.
-      Input:  webcam 0
-      Output: td_out/
-```
+Wait for `[INIT] Model ready.` A Python preview window opens (input | output side-by-side).
 
-Switch models by stopping (Ctrl+C) and re-running with a different config:
-```powershell
-python touchdesigner/td_bridge.py --config configs/kohaku_quality.yaml --webcam 0
-python touchdesigner/td_bridge.py --config configs/consciousness_projection.yaml --webcam 0
-python touchdesigner/td_bridge.py --config configs/sdturbo_tensorrt.yaml --webcam 0
-```
+**Step 2 — Build the TD network (4 nodes, ~2 min):**
 
-**Step 2 — TouchDesigner network setup (auto-build, 30 seconds):**
+Full step-by-step: [`docs/touchdesigner-setup.md`](touchdesigner-setup.md)
 
-1. Open TouchDesigner 2023 → new empty project
-2. Press `Tab` → **Text DAT** → place it
-3. Double-click → paste entire `touchdesigner/td_network_builder.py`
-4. Right-click → **Run Script**
-5. `/StreamDiffusion` container created with all nodes: input/output view, OSC, prompt box, model switches, stats
+Quick version — create these 4 nodes manually:
 
-This builds: `input_view` (raw webcam), `output_view` (diffused), `osc_in`, `osc_out`, `prompt_text`, `strength_text`, `seed_text`, `executor` (auto-sends OSC), model-switch DATs, art preset DATs, and `stats_text`.
+1. `Tab` → **TOP** → **File In**
+   - File: `D:/Github/StreamDiffusion/td_out/output_frame.png` (forward slashes)
+   - Cook Rate: `Every Frame`, Always Active: `On`
+   - Right-click → **View** → live diffused output appears
 
-For manual build see: `docs/touchdesigner-setup.md`
+2. `Tab` → **CHOP** → **OSC Out**
+   - Network Address: `127.0.0.1`, Port: `9000`
+   - TD names this `oscout1` by default
 
-**Step 3 — Control from TouchDesigner (after auto-build):**
+3. `Tab` → **CHOP** → **OSC In**
+   - Port: `9001`, Active: `On`
+   - Shows `/fps`, `/vram_used`, `/status` live from Python
 
-- Edit `prompt_text` DAT → executor auto-sends `/prompt` via OSC on every keystroke
-- Edit `strength_text` DAT (0.0–1.0) → auto-sends `/strength`
-- Right-click `switch_sdturbo` / `switch_kohaku` / `switch_art` / `switch_tensorrt` → Run Script to hot-swap model (~20s reload)
-- Right-click `preset_0`–`preset_6` → Run Script to cycle art presets
-
-Manual OSC (in any Text DAT → right-click → Run Script):
+4. `Tab` → **DAT** → **Text** — paste this, then right-click → **Run Script** to send:
 ```python
-op('osc_out').sendOSC('/prompt', ['abstract generative art, flowing light, ethereal'])
-op('osc_out').sendOSC('/strength', [0.75])
-op('osc_out').sendOSC('/seed', [99])
-op('osc_out').sendOSC('/pause', [1])        # pause
-op('osc_out').sendOSC('/pause', [0])        # resume
-op('osc_out').sendOSC('/prompt_index', [2]) # art preset 2
-op('osc_out').sendOSC('/model', ['configs/kohaku_quality.yaml'])  # hot-swap
+osc = op('oscout1')
+osc.sendOSC('/prompt',   ["vivid oil painting, golden hour, cinematic"])
+osc.sendOSC('/strength', [0.6])   # 0.0 subtle -> 1.0 full transform
+osc.sendOSC('/seed',     [42])
+```
+
+**Step 3 — Model switching from TD:**
+
+Create one Text DAT per model → right-click → **Run Script**:
+```python
+op('oscout1').sendOSC('/model', ['configs/sdturbo_fast.yaml'])     # 4.1 fps
+op('oscout1').sendOSC('/model', ['configs/kohaku_quality.yaml'])   # 3.4 fps, better quality
+op('oscout1').sendOSC('/model', ['configs/consciousness_projection.yaml'])  # art, 7 presets
+op('oscout1').sendOSC('/model', ['configs/sdturbo_tensorrt.yaml']) # 5.6 fps fastest
+```
+
+Model reloads in ~20s without restarting the script. Output freezes on last frame then resumes.
+
+**Other OSC controls:**
+```python
+op('oscout1').sendOSC('/pause',        [1])   # pause / 0 = resume
+op('oscout1').sendOSC('/negative',     ["blurry, low quality"])
+op('oscout1').sendOSC('/prompt_index', [3])   # art preset 0–6
 ```
 
 ---
