@@ -1,14 +1,8 @@
-ï»¿# Consciousness Projection Preset
-# For live installation work: real-time transformation of the visible world
-# through the lens of inner perception Ã¢â¬” what we carry, what we see with
-# the eye that isn't an eye, what consciousness does when it turns toward itself.
-#
-# Core concept: the camera sees the outer. The model reveals the inner.
-# Every frame is both memory and anticipation Ã¢â¬” seeing backward and forward at once.
-# RTX 2060 actual: ~4-5 fps xformers | 5.83 fps tensorrt (benchmarked)
+# Consciousness Projection Preset
+# RTX 2060 actual: ~4-5 fps xformers | 5.83 fps tensorrt
 
 model:
-  id: "D:\\Github\\StreamDiffusion\\models\\sd-turbo"   # local path; HF cache alternative: "stabilityai/sd-turbo"
+  id: "D:\\Github\\StreamDiffusion\\models\\sd-turbo"
   use_tiny_vae: true
   use_lcm_lora: false
 
@@ -19,7 +13,7 @@ inference:
   t_index_list: [32, 45]
   cfg_type: "none"
   guidance_scale: 1.0
-  delta: 0.6                   # higher delta = more transformation from input; the past made visible
+  delta: 0.6
   num_inference_steps: 50
   acceleration: "xformers"
   warmup: 10
@@ -27,9 +21,6 @@ inference:
   enable_similar_image_filter: true
   similar_image_filter_threshold: 0.97
 
-# Prompt library Ã¢â¬” human perception, inner light, the third eye, temporal consciousness
-# Each describes a different mode of seeing: not what's there, but what's behind it.
-# Switch between these via OSC /prompt_index <int>
 prompts:
   library:
     - "third eye opening, fractal iris geometry, sacred light patterns, violet and indigo glow"
@@ -51,4 +42,3 @@ output:
   show_window: true
   save_frames: true
   frame_dir: "td_out"
-

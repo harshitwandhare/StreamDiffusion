@@ -101,7 +101,7 @@ for cfg in configs:
 
 print("=== Benchmark Summary ===")
 for r in results:
-    print(f"  {r['config']:25s} → {r['fps']:6.1f} fps  {r['ms_per_frame']:5.0f} ms/frame  {r['vram_mb']} MB VRAM")
+    print(f"  {r['config']:25s} -> {r['fps']:6.1f} fps  {r['ms_per_frame']:5.0f} ms/frame  {r['vram_mb']} MB VRAM")
 
 out_json = os.path.join(OUTPUT_DIR, "benchmark.json")
 with open(out_json, "w") as f:

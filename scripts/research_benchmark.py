@@ -276,7 +276,7 @@ def main():
     print("\nSummary:")
     for r in results:
         if r.get("fps", 0) > 0:
-            print(f"  {r['label']:28s} → {r['fps']:6.1f} fps")
+            print(f"  {r['label']:28s} -> {r['fps']:6.1f} fps")
 
     print(report_md)
 

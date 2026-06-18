@@ -61,7 +61,7 @@ from PIL import Image
 
 
 def load_config(path: str) -> dict:
-    with open(path, "r") as f:
+    with open(path, encoding="utf-8-sig") as f:
         return yaml.safe_load(f)
 
 
@@ -107,27 +107,27 @@ class StreamBridge:
             with self._lock:
                 self._current_prompt = str(args[0])
                 self._prompt_dirty = True
-            print(f"[OSC] prompt → {self._current_prompt[:60]}...")
+            print(f"[OSC] prompt -> {self._current_prompt[:60]}...")
 
     def _osc_negative(self, address, *args):
         if args:
             with self._lock:
                 self._negative_prompt = str(args[0])
                 self._prompt_dirty = True
-            print(f"[OSC] negative → {self._negative_prompt[:60]}...")
+            print(f"[OSC] negative -> {self._negative_prompt[:60]}...")
 
     def _osc_strength(self, address, *args):
         if args:
             with self._lock:
                 self._delta = float(max(0.0, min(1.0, args[0])))
-            print(f"[OSC] strength → {self._delta:.2f}")
+            print(f"[OSC] strength -> {self._delta:.2f}")
 
     def _osc_seed(self, address, *args):
         if args:
             with self._lock:
                 self._seed = int(args[0])
                 self._prompt_dirty = True
-            print(f"[OSC] seed → {self._seed}")
+            print(f"[OSC] seed -> {self._seed}")
 
     def _osc_pause(self, address, *args):
         with self._lock:
@@ -140,7 +140,7 @@ class StreamBridge:
             with self._lock:
                 self._current_prompt = self._prompt_library[idx]
                 self._prompt_dirty = True
-            print(f"[OSC] prompt_index {idx} → {self._current_prompt[:60]}...")
+            print(f"[OSC] prompt_index {idx} -> {self._current_prompt[:60]}...")
 
     # -------------------------------------------------------------------------
     # OSC server setup

@@ -1,5 +1,5 @@
 """
-td_ndi_bridge.py — StreamDiffusion → TouchDesigner via NDI video + OSC control
+td_ndi_bridge.py — StreamDiffusion -> TouchDesigner via NDI video + OSC control
 
 NDI sends the output as a proper video stream (no PNG polling).
 In TouchDesigner: add an NDI In TOP, select source "StreamDiffusion".
@@ -49,7 +49,7 @@ from utils.wrapper import StreamDiffusionWrapper
 # ── config loader ─────────────────────────────────────────────────────────────
 
 def load_config(path: str) -> dict:
-    with open(path) as f:
+    with open(path, encoding="utf-8-sig") as f:
         return yaml.safe_load(f)
 
 
@@ -149,44 +149,54 @@ def main():
     args = parser.parse_args()
 
     cfg = load_config(args.config)
-    width  = cfg.get("width", 512)
-    height = cfg.get("height", 512)
+    m   = cfg["model"]
+    inf = cfg["inference"]
+    osc_cfg = cfg.get("osc", {})
+    width  = inf.get("width",  512)
+    height = inf.get("height", 512)
+
+    # OSC ports: CLI args override config
+    osc_in_port  = args.osc_in  if args.osc_in  != 9000 else osc_cfg.get("in_port",  9000)
+    osc_out_port = args.osc_out if args.osc_out != 9001 else osc_cfg.get("out_port", 9001)
 
     # ── StreamDiffusion ──────────────────────────────────────────────────────
-    print(f"[sd] loading model: {cfg['model_id_or_path']}")
+    model_id = m["id"]
+    print(f"[sd] loading model: {model_id}")
     stream = StreamDiffusionWrapper(
-        model_id_or_path=cfg["model_id_or_path"],
-        use_tiny_vae=cfg.get("use_tiny_vae", True),
+        model_id_or_path=model_id,
+        use_tiny_vae=m.get("use_tiny_vae", True),
         device=torch.device("cuda"),
         dtype=torch.float16,
-        t_index_list=cfg.get("t_index_list", [35, 45]),
+        t_index_list=inf.get("t_index_list", [35, 45]),
         frame_buffer_size=1,
         width=width,
         height=height,
-        use_lcm_lora=cfg.get("use_lcm_lora", False),
+        use_lcm_lora=m.get("use_lcm_lora", False),
         output_type="pil",
-        warmup=10,
-        acceleration=cfg.get("acceleration", "xformers"),
-        mode="img2img",
+        warmup=inf.get("warmup", 10),
+        acceleration=inf.get("acceleration", "xformers"),
+        mode=inf.get("mode", "img2img"),
         use_denoising_batch=True,
-        cfg_type=cfg.get("cfg_type", "none"),
-        enable_similar_image_filter=True,
-        similar_image_filter_threshold=0.98,
+        cfg_type=inf.get("cfg_type", "none"),
+        enable_similar_image_filter=inf.get("enable_similar_image_filter", True),
+        similar_image_filter_threshold=inf.get("similar_image_filter_threshold", 0.98),
         similar_image_filter_max_skip_frame=10,
     )
 
-    default_prompt = cfg.get("prompts", [""])[0] if cfg.get("prompts") else cfg.get("prompt", "")
+    prompts_cfg    = cfg.get("prompts", {})
+    default_prompt = prompts_cfg.get("default", "")
+    negative_prompt = prompts_cfg.get("negative", "")
     stream.prepare(
         prompt=default_prompt,
-        negative_prompt=cfg.get("negative_prompt", ""),
-        num_inference_steps=50,
-        guidance_scale=cfg.get("guidance_scale", 1.2),
+        negative_prompt=negative_prompt,
+        num_inference_steps=inf.get("num_inference_steps", 50),
+        guidance_scale=inf.get("guidance_scale", 1.2),
     )
     print("[sd] warmed up")
 
     # ── NDI + OSC ────────────────────────────────────────────────────────────
     ndi_sender = NDISender(args.ndi_name, width, height)
-    osc = OSCLayer(args.osc_in, args.osc_out)
+    osc = OSCLayer(osc_in_port, osc_out_port)
     osc.start_server()
 
     # ── webcam ───────────────────────────────────────────────────────────────
@@ -201,7 +211,7 @@ def main():
     os.makedirs("td_out", exist_ok=True)
 
     print(f"\n[ready] StreamDiffusion active — NDI source: '{args.ndi_name}'")
-    print("        In TouchDesigner: NDI In TOP → select 'StreamDiffusion'")
+    print("        In TouchDesigner: NDI In TOP -> select 'StreamDiffusion'")
     print("        OSC control: port 9000   stats: port 9001")
     print("        Ctrl+C to stop\n")
 
