@@ -28,8 +28,8 @@ python scripts/test_cuda.py
 | Image file to image file (batch) | `examples/img2img/multi.py` | batch |
 | Text to image file | `examples/txt2img/single.py` | one-shot |
 | Text to image stream (viewer) | `examples/optimal-performance/single.py` | 4.7 |
-| TouchDesigner NDI (one-click) | `start_td_ndi.bat` | 4.7-5.8 |
-| TouchDesigner PNG fallback | `start_td.bat` | 4.7-5.8 |
+| TouchDesigner NDI bridge | `touchdesigner/td_ndi_bridge.py` | 4.7-5.8 |
+| TouchDesigner PNG bridge | `touchdesigner/td_bridge.py` | 4.7-5.8 |
 | Build your own .tox operator | `touchdesigner/build_component.py` | -- |
 | Benchmark xformers | `scripts/research_benchmark.py` | measures |
 | Benchmark TensorRT | `scripts/run_tensorrt_benchmark.py` | measures |
@@ -45,6 +45,7 @@ All open at `http://localhost:8080`. Press `Ctrl+C` to stop.
 
 ```powershell
 cd demo/realtime-img2img
+$env:SD_MODEL = "D:\Github\StreamDiffusion\models\sd-turbo"
 python main.py --port 8080 --acceleration xformers
 ```
 
@@ -53,10 +54,9 @@ With TensorRT (~23% faster, ~53s compile on first run):
 python main.py --port 8080 --acceleration tensorrt
 ```
 
-Use a local model (skip HuggingFace download):
+Switch to Kohaku model (better artistic quality, ~3.4 fps):
 ```powershell
-$env:SD_MODEL = "D:\Github\StreamDiffusion\models\sd-turbo"
-python main.py --port 8080
+python main.py --port 8080 --model_id_or_path KBlueLeaf/kohaku-v2.1 --acceleration xformers
 ```
 
 Webcam feed on the left, diffused output on the right. Type a prompt and it
@@ -193,14 +193,6 @@ python examples/screen/main.py `
 Sends output as a real NDI video source. Best quality and latency.
 Requires NDI SDK: https://ndi.video/download-ndi-sdk/
 
-**One-click:**
-```
-Double-click start_td_ndi.bat
-Select mode (1-4) and webcam index
-Wait for "[ready] StreamDiffusion active"
-```
-
-**Or manually:**
 ```powershell
 python touchdesigner/td_ndi_bridge.py --config configs/sdturbo_fast.yaml --webcam 0
 python touchdesigner/td_ndi_bridge.py --config configs/sdturbo_tensorrt.yaml --webcam 0
@@ -228,13 +220,11 @@ op('oscout1').sendOSC('/pause',    [1])   # 1=pause, 0=resume
 Auto-builds a full Container COMP with UI: Start/Stop, prompt, strength, seed,
 guidance scale, live FPS/VRAM readout.
 
-1. Run `start_td_ndi.bat` (step 3a)
-2. In TouchDesigner: `Tab` -> **Text DAT** -> paste `touchdesigner/build_component.py` -> right-click -> **Run Script**
+1. Start the NDI bridge first (step 3a)
+2. In TouchDesigner: `Tab` -> **Text DAT** -> paste contents of `touchdesigner/build_component.py` -> right-click -> **Run Script**
 3. `StreamDiffusionTD` component appears
 4. Setup page -> **Base Folder**: `D:\Github\StreamDiffusion` -> **Start Stream**
 5. Right-click -> **Save Component As** -> `StreamDiffusionTD.tox`
-
-Run `touchdesigner/build_component.py` inside TouchDesigner as a Script DAT to auto-build the component.
 
 ---
 
@@ -243,11 +233,6 @@ Run `touchdesigner/build_component.py` inside TouchDesigner as a Script DAT to a
 Writes each frame to `td_out/current_frame.png`. TouchDesigner polls it via
 File In TOP. Higher latency than NDI but no extra installs needed.
 
-```
-Double-click start_td.bat
-```
-
-Or:
 ```powershell
 python touchdesigner/td_bridge.py --config configs/sdturbo_fast.yaml --webcam 0
 ```
